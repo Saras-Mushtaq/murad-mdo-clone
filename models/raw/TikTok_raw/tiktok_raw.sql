@@ -1,0 +1,65 @@
+select 
+buyer_email,
+cancel_order_sla_time,
+Date(DATETIME(TIMESTAMP_SECONDS(CAST(create_time AS INT64)), "America/Los_Angeles")) AS Date,
+Date(DATETIME(TIMESTAMP_SECONDS(CAST(update_time AS INT64)), "America/Los_Angeles")) AS update_time,
+Date(DATETIME(TIMESTAMP_SECONDS(CAST(cancel_time AS INT64)), "America/Los_Angeles")) AS CancelDate,
+delivery_option_name,
+delivery_type,
+a.id as Order_ID,
+fulfillment_type,
+is_cod,
+is_replacement_order,
+is_sample_order,
+paid_time,
+payment_method_name,
+shipping_due_time,
+shipping_type,
+status,
+user_id,
+warehouse_id,
+line_item.currency,
+line_item.id,
+line_item.handling_duration_days,
+line_item.display_status,
+line_item.is_gift,
+line_item.product_id,
+line_item.product_name,
+line_item.sku_id,
+line_item.sku_name,
+coalesce(CAST(line_item.platform_discount AS FLOAT64),0) platform_discount ,
+coalesce(CAST(line_item.original_price AS FLOAT64),0) original_price,
+coalesce(CAST(line_item.sale_price AS FLOAT64),0) sale_price,
+coalesce(CAST(line_item.seller_discount AS FLOAT64),0) seller_discount,
+coalesce(cast(line_item.small_order_fee as FLOAT64),0) small_order_fee,
+coalesce(CAST(item_tax.tax_amount AS FLOAT64),0) tax_amount,
+coalesce(CAST(payment.original_shipping_fee AS FLOAT64),0) original_shipping_fee,
+coalesce(cast(payment.retail_delivery_fee as FLOAT64),0) retail_delivery_fee,
+coalesce(CAST(payment.shipping_fee AS FLOAT64),0) shipping_fee,
+coalesce(CAST(payment.shipping_fee_platform_discount AS FLOAT64),0) shipping_fee_platform_discount,
+coalesce(CAST(payment.shipping_fee_seller_discount AS FLOAT64),0) shipping_fee_seller_discount,
+coalesce(cast(payment.tax as FLOAT64),0) tax,
+coalesce(cast(payment.total_amount as FLOAT64),0) total_amount,
+-- payment.sub_total,
+-- payment.original_total_product_price,
+-- payment.platform_discount,
+-- payment.product_tax,
+-- payment.seller_discount,
+item_tax.tax_type,
+recipient_address.full_address,
+recipient_address.name,
+recipient_address.phone_number,
+recipient_address.region_code,
+recipient_address.postal_code,
+delivery_preferences.drop_off_location,
+from
+murad-data-warehouse.BigQuery.murad_us_tiktok_shop_Orders a
+left join UNNEST(line_items) AS line_item
+left join UNNEST(line_item.item_tax) AS item_tax
+left join UNNEST(packages) AS packages
+left join UNNEST(payment) AS payment
+left join UNNEST(recipient_address) AS recipient_address
+left join UNNEST(recipient_address.delivery_preferences) AS delivery_preferences
+QUALIFY DENSE_RANK() OVER(PARTITION BY a.id ORDER BY _daton_batch_runtime DESC) = 1
+
+ 

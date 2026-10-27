@@ -1,0 +1,71 @@
+version: 2
+models:
+
+  - name: KlaviyoCampaigns
+    config:
+      materialized : incremental
+      incremental_strategy: merge
+      unique_key : ['id']
+      
+
+  - name: KlaviyoClickedEmail
+    config:
+      materialized : incremental
+      incremental_strategy: merge
+      unique_key : ['id']
+      partition_by: { 'field': 'datetime', 'data_type': 'timestamp', 'granularity': 'day' }
+      cluster_by : ['event_properties_Campaign_Name']
+      
+
+  - name: KlaviyoClickedSMS
+    config:
+      materialized : incremental
+      incremental_strategy: merge
+      unique_key : ['id']
+      partition_by : { 'field': 'date', 'data_type': 'date'}
+      cluster_by : ['event_properties_Campaign_Name']
+
+
+  - name: KlaviyoFlows
+    config:
+      materialized : incremental
+      incremental_strategy: merge
+      unique_key : ['id']
+      partition_by : { 'field': 'updated_date', 'data_type': 'date'}
+
+
+  - name: KlaviyoOpenedEmail
+    config:
+      +materialized: incremental
+      +incremental_strategy: merge
+      +unique_key: ['id']
+      +partition_by: 
+        field: date
+        data_type: date
+      +cluster_by: ['event_properties_Campaign_Name']
+
+  - name: KlaviyoPlacedOrder
+    config:
+      materialized : incremental
+      incremental_strategy: merge
+      unique_key : ['id','attribution_attributed_event_id']
+      partition_by: { 'field': 'attributes_datetime', 'data_type': 'timestamp', 'granularity': 'day' }
+
+
+
+  - name: KlaviyoReceivedSMS
+    config:
+      materialized : incremental
+      incremental_strategy: merge
+      unique_key : ['id']
+      partition_by : { 'field': 'date', 'data_type': 'date'}
+      cluster_by : ['event_properties_Campaign_Name']
+
+  - name: KlaviyoReceivedEmail
+    config:
+      materialized : incremental
+      incremental_strategy: merge
+      unique_key : ['id']
+      partition_by : { 'field': 'datetime', 'data_type': 'timestamp', 'granularity': 'day' }
+      cluster_by : ['event_properties_Campaign_Name']
+

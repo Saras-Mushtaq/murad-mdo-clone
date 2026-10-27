@@ -1,0 +1,36 @@
+SELECT
+a.order_id order_id,
+Date,
+CancelDate,
+status,
+a.sku_id sku_id,
+product_id,
+a.product_name product_name,
+is_gift,
+user_id,
+name,
+full_address,
+buyer_email,
+phone_number,
+postal_code,
+region_code,
+fulfillment_type,
+Case when 
+a.order_id in (select distinct order_id from {{ ref('Tiktok_return') }} where return_status!='RETURN_OR_REFUND_REQUEST_CANCEL') 
+then true else false end AS is_returned,
+b.Return_initiate_date Return_initiate_date,
+b.Return_date Return_date,
+returned_quantity,
+returned_amount,
+count(product_id) quantity,
+sum(sale_price) sale_price,
+sum(sale_price)/count(product_id) sale_price_per_unit,
+sum(original_price) original_price,
+sum(seller_discount) as seller_discount,
+sum(platform_discount) platform_discount,
+sum(tax_amount) tax_amount,
+SUM(CASE WHEN CancelDate IS NOT NULL THEN sale_price ELSE 0 END) AS Cancel_Price,
+SUM(CASE WHEN CancelDate IS NULL THEN sale_price ELSE 0 END) AS Price,
+from(
+{{ ref('tiktok_raw') }} a left join {{ ref('Tiktok_return') }} b on a.order_id=b.order_id and a.product_name=b.product_name and a.sku_id=b.sku_id)
+group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21
